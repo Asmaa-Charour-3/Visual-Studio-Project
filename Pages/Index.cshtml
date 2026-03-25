@@ -1,0 +1,176 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Asmaa's Digital Portfolio";
+}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.07);
+        --accent-pink: #ff007a;
+        --accent-blue: #00d4ff;
+    }
+
+    body {
+        margin: 0;
+        background: #050505;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+    }
+
+    /* Animated Background: Moving Mesh */
+    #bg-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        opacity: 0.4;
+    }
+
+    .container-layout {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    /* THE H1: Typewriter Style with Neon Underline */
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 10px;
+        min-height: 80px; /* Prevents layout jump */
+        background: linear-gradient(90deg, var(--accent-pink), var(--accent-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* THE VIDEO CONTAINER: Modern Bezel */
+    .video-frame {
+        position: relative;
+        width: 100%;
+        max-width: 750px;
+        background: var(--glass-bg);
+        padding: 10px;
+        border-radius: 30px;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 40px rgba(255, 0, 122, 0.2);
+    }
+
+    .video-inner {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+        .video-inner iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+    .status-bar {
+        margin-top: 15px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.85rem;
+        letter-spacing: 2px;
+        color: var(--accent-blue);
+        text-transform: uppercase;
+    }
+</style>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="container-layout">
+    <h1 class="hero-title" id="typewriter-h1"></h1>
+    
+    <div class="video-frame">
+        <div class="video-inner">
+            <iframe width="1062" height="734" src="https://www.youtube.com/embed/RQOg16kmFJM" title="Asake, DJ Snake - WORSHIP (Official Video)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <div class="status-bar" id="status-msg">Initializing Asmaa's Core...</div>
+</div>
+
+<script>
+    // --- TYPEWRITER ANIMATION ---
+    const text = "Asmaa Charour";
+    const speed = 150;
+    let i = 0;
+
+    function typeWriter() {
+        if (i < text.length) {
+            document.getElementById("typewriter-h1").innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typeWriter, speed);
+        }
+    }
+
+    // --- BACKGROUND MESH ANIMATION ---
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let lines = [];
+
+    function initCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    class Line {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 1.5;
+            this.vy = (Math.random() - 0.5) * 1.5;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff007a';
+            ctx.fill();
+        }
+    }
+
+    for (let j = 0; j < 60; j++) lines.push(new Line());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        lines.forEach((l, index) => {
+            l.x += l.vx;
+            l.y += l.vy;
+            if (l.x < 0 || l.x > canvas.width) l.vx *= -1;
+            if (l.y < 0 || l.y > canvas.height) l.vy *= -1;
+            l.draw();
+
+            // Draw connecting lines
+            for (let k = index + 1; k < lines.length; k++) {
+                let dist = Math.hypot(l.x - lines[k].x, l.y - lines[k].y);
+                if (dist < 150) {
+                    ctx.strokeStyle = `rgba(0, 212, 255, ${1 - dist / 150})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(l.x, l.y);
+                    ctx.lineTo(lines[k].x, lines[k].y);
+                    ctx.stroke();
+                }
+            }
+        });
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    animate();
+    typeWriter(); // Start typewriter on load
+</script>
